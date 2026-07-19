@@ -2,6 +2,7 @@
 
 import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BoringWorksSignature } from "@/app/boring-works-signature";
 import { BugReport, categories, priorities, reportToMarkdown, reportTypes } from "@/lib/report";
 
 type SavedReport = BugReport & { id: string; savedAt: string };
@@ -209,6 +210,6 @@ export default function Home() {
       <div className="section-heading"><div><p className="eyebrow">THIS BROWSER</p><h2>Saved reports</h2></div></div>
       {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <button key={item.id} onClick={() => { setReport(item); setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 0); }}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}</small></button>)}</div>}
     </section>
-    <footer><div><span><strong>boring</strong> Bugshot</span>. <p>Screenshots in. Useful reports out. No drama.</p></div><nav><a href="#top">Top</a><a href="#openai-core">OpenAI core</a><a href="#workspace">Workspace</a><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link><Link className="demo-link" href="/demo">Demo lab</Link></nav></footer>
+    <footer><BoringWorksSignature withTagline /><nav><a href="#top">Top</a><a href="#openai-core">OpenAI core</a><a href="#workspace">Workspace</a><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link><Link className="demo-link" href="/demo">Demo lab</Link></nav></footer>
   </main>;
 }

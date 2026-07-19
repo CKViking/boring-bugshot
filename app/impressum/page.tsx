@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BoringWorksSignature } from "@/app/boring-works-signature";
 
 export const metadata: Metadata = {
   title: "Impressum — boring Bugshot",
@@ -36,6 +37,6 @@ export default function ImpressumPage() {
         48143 Münster
       </address>
     </article>
-    <footer className="legal-footer"><div><span><strong>boring</strong> Bugshot</span></div><nav><Link href="/">Tool</Link><Link href="/datenschutz">Datenschutz</Link></nav></footer>
+    <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/">Tool</Link><Link href="/datenschutz">Datenschutz</Link></nav></footer>
   </main>;
 }

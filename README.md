@@ -23,6 +23,7 @@ Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/bor
 - Report-Perspektive waehlen: Automatic, Technical, Design, UX oder Accessibility
 - fokussierte Produktseite mit sichtbarem OpenAI-Build-Week- und GPT-5.6-Kern
 - englisches Demo Lab unter `/demo` mit vier reproduzierbaren Beispiel-Bugs
+- originales boring-works-Favicon sowie dezentes boring-works-Wortzeichen als Absender im Footer
 
 ## Lokal starten
 

@@ -5,6 +5,10 @@ export const metadata: Metadata = {
   title: "boring Bugshot — Screenshot to bug report",
   description: "Turn one screenshot into a structured, editable bug report with GPT-5.6 vision and Structured Outputs.",
   applicationName: "boring Bugshot",
+  icons: {
+    icon: [{ url: "/icon.svg", type: "image/svg+xml" }],
+    apple: "/apple-icon.png",
+  },
   keywords: ["bug report", "screenshot", "GPT-5.6", "OpenAI Build Week", "visual QA"],
   openGraph: {
     title: "boring Bugshot",
