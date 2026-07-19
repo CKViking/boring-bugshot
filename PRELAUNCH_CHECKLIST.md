@@ -1,10 +1,10 @@
 # boring Bugshot - Pre-Launch-Check
 
-Stand: 18. Juli 2026
+Stand: 19. Juli 2026
 
 ## Ergebnis
 
-Der lokale Produktions-Build ist fuer einen Netlify-Deploy bereit. Die Kernfunktion, die Exporte, die statischen Demo-Routen und die Launch-Kommunikation wurden geprueft.
+Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und echter Production-Deploy wurden geprueft; Kernfunktion, Exporte, statische Demo-Routen, Rechtstexte und Launch-Kommunikation funktionieren auf der Live-Adresse.
 
 ## Erfolgreich geprueft
 
@@ -26,6 +26,10 @@ Der lokale Produktions-Build ist fuer einen Netlify-Deploy bereit. Die Kernfunkt
 - einfaches Rate Limit begrenzt wiederholte Aufrufe pro Verbindung
 - alle vier Demo-Routen werden statisch erzeugt
 - Responsive-Demo zeigt einen neutralen Desktop-Browser-Rahmen, 390 x 844 Pixel und beide Scrollbars
+- https://boring-bugshot.netlify.app/ liefert oeffentlich HTTP 200
+- Impressum, Datenschutz, Demo Lab und Responsive-Demo liefern oeffentlich HTTP 200
+- Screenshot-Analyse ueber die Netlify-Function und OpenAI API ist erfolgreich
+- Save-Feedback sowie PDF- und Markdown-Download funktionieren im Production-Deploy
 
 ## Hackathon-Fokus
 
@@ -39,15 +43,19 @@ Die Toolseite stellt jetzt zuerst das Produkt und den OpenAI-Kern dar:
 
 Das passt zu den vier offiziellen Bewertungspunkten: technische Umsetzung, Design und UX, potenzielle Wirkung und Qualitaet der Idee.
 
+## Deployment abgeschlossen
+
+1. Code liegt oeffentlich unter https://github.com/CKViking/boring-bugshot.
+2. Netlify ist mit `main` verbunden.
+3. `OPENAI_API_KEY` und `OPENAI_MODEL=gpt-5.6` sind serverseitig in Netlify konfiguriert.
+4. Production-Deploy ist erfolgreich.
+5. Live-Analyse, Save, PDF und Markdown sind erfolgreich getestet.
+
 ## Vor der finalen Einreichung noch erforderlich
 
-1. Code in das vorgesehene GitHub-Repository uebertragen.
-2. Netlify mit dem Repository verbinden.
-3. `OPENAI_API_KEY` und `OPENAI_MODEL=gpt-5.6` in Netlify eintragen.
-4. Den ersten Netlify-Deploy abwarten.
-5. Auf der echten Netlify-Adresse einen Screenshot analysieren und PDF sowie Markdown herunterladen.
-6. Netlify Function Logs nach diesem Test auf Fehler kontrollieren.
-7. Demo-Video, Projektbeschreibung und Repository-Link fuer die Einreichung vorbereiten.
+1. Netlify Function Logs nach dem erfolgreichen Test kurz auf unerwartete Fehler kontrollieren.
+2. Demo-Video aufnehmen.
+3. Projektbeschreibung, Live-URL und Repository-Link in das Einreichungsformular uebertragen.
 
 ## Bewusste MVP-Grenzen
 

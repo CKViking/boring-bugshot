@@ -42,7 +42,7 @@ Status: umgesetzt.
 - Ein einfaches Rate Limit begrenzt wiederholte Analyseaufrufe pro Verbindung.
 - Das Responsive-Demo-Beispiel sitzt in einem neutralen Desktop-Browser-Rahmen; horizontale und vertikale Scrollbars machen den Fehler eindeutig.
 
-Status: umgesetzt und vor dem Deployment erneut zu testen.
+Status: umgesetzt und auf dem oeffentlichen Netlify-Deployment erfolgreich getestet.
 
 ## Export und Speicher-Feedback vom 17. Juli 2026
 
@@ -52,3 +52,16 @@ Status: umgesetzt und vor dem Deployment erneut zu testen.
 - Lange Reports erhalten automatische Folgeseiten und Seitenzahlen.
 
 Status: umgesetzt.
+
+## Oeffentlicher Launch vom 19. Juli 2026
+
+- Live-URL: https://boring-bugshot.netlify.app/
+- GitHub: https://github.com/CKViking/boring-bugshot
+- Netlify ist mit `main` verbunden und deployt neue Pushes automatisch.
+- Der erste Production-Deploy basiert auf Commit `ac4b4f9`.
+- Startseite, Demo Lab, Responsive-Demo, Impressum und Datenschutz liefern oeffentlich HTTP 200.
+- Ein echter Screenshot wurde auf der Netlify-Version erfolgreich mit GPT-5.6 analysiert.
+- Automatic waehlt eine passende Perspektive; Structured Output, editierbare Felder und Tickettext funktionieren.
+- Save-Feedback sowie PDF- und Markdown-Download wurden auf der oeffentlichen Version erfolgreich getestet.
+
+Status: MVP oeffentlich und end-to-end funktionsfaehig.

@@ -4,6 +4,12 @@
 
 Lauffaehige MVP-Version eines visuellen Bug-Reporting-Tools fuer die OpenAI Build Week.
 
+## Live
+
+**[boring-bugshot.netlify.app](https://boring-bugshot.netlify.app/)**
+
+Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/boring-bugshot](https://github.com/CKViking/boring-bugshot) verbunden. Ein vollstaendiger Smoke-Test am 19. Juli 2026 bestaetigte Screenshot-Analyse, GPT-5.6 Structured Output, Bearbeitung, lokales Speichern, PDF- und Markdown-Export sowie Demo Lab, Impressum und Datenschutz.
+
 ## Funktionen
 
 - Screenshot-Upload, Drag-and-drop und direktes Einfuegen aus der Zwischenablage mit `Ctrl+V`
