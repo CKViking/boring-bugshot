@@ -4,7 +4,7 @@ Stand: 19. Juli 2026
 
 ## Ergebnis
 
-Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und echter Production-Deploy wurden geprueft; Kernfunktion, Exporte, statische Demo-Routen, Rechtstexte und Launch-Kommunikation funktionieren auf der Live-Adresse.
+Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und echter Production-Deploy wurden geprueft; Kernfunktion, Exporte, statische Demo-Routen, Rechtstexte und Launch-Kommunikation funktionieren auf der Live-Adresse. Die Netlify Function Logs zeigen erfolgreiche Aufrufe ohne sichtbare Fehlermeldungen.
 
 ## Erfolgreich geprueft
 
@@ -30,6 +30,7 @@ Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und ec
 - Impressum, Datenschutz, Demo Lab und Responsive-Demo liefern oeffentlich HTTP 200
 - Screenshot-Analyse ueber die Netlify-Function und OpenAI API ist erfolgreich
 - Save-Feedback sowie PDF- und Markdown-Download funktionieren im Production-Deploy
+- Netlify Function Logs zeigen abgeschlossene Aufrufe ohne sichtbare Fehler
 
 ## Hackathon-Fokus
 
@@ -50,12 +51,12 @@ Das passt zu den vier offiziellen Bewertungspunkten: technische Umsetzung, Desig
 3. `OPENAI_API_KEY` und `OPENAI_MODEL=gpt-5.6` sind serverseitig in Netlify konfiguriert.
 4. Production-Deploy ist erfolgreich.
 5. Live-Analyse, Save, PDF und Markdown sind erfolgreich getestet.
+6. Netlify Function Logs wurden nach dem End-to-End-Test kontrolliert; keine unerwarteten Fehler sichtbar.
 
 ## Vor der finalen Einreichung noch erforderlich
 
-1. Netlify Function Logs nach dem erfolgreichen Test kurz auf unerwartete Fehler kontrollieren.
-2. Demo-Video aufnehmen.
-3. Projektbeschreibung, Live-URL und Repository-Link in das Einreichungsformular uebertragen.
+1. Demo-Video aufnehmen.
+2. Projektbeschreibung, Live-URL und Repository-Link in das Einreichungsformular uebertragen.
 
 ## Bewusste MVP-Grenzen
 
