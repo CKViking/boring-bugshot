@@ -8,7 +8,7 @@ import styles from "../demo.module.css";
 type PageProps = { params: Promise<{ slug: string }> };
 
 function DemoExampleFooter() {
-  return <footer className={styles.exampleFooter}><Link href="/demo">Bugshot Demo Lab</Link><nav><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link></nav></footer>;
+  return <footer className={styles.exampleFooter}><Link href="/demo" target="_blank" rel="noreferrer">Bugshot Demo Lab</Link><nav><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link></nav></footer>;
 }
 
 export function generateStaticParams() {

@@ -50,6 +50,6 @@ export default function DemoLab() {
       </article>)}
     </section>
 
-    <footer className={styles.labFooter}><Link href="/">← Back to boring Bugshot</Link><p>Built for repeatable screenshots. Broken on purpose.</p><nav><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link></nav></footer>
+    <footer className={styles.labFooter}><Link href="/" target="_blank" rel="noreferrer">← Back to boring Bugshot</Link><p>Built for repeatable screenshots. Broken on purpose.</p><nav><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link></nav></footer>
   </main>;
 }

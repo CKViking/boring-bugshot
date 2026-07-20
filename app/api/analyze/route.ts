@@ -1,7 +1,7 @@
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { NextResponse } from "next/server";
-import { reportSchema } from "@/lib/report";
+import { generatedReportSchema, reportSchema } from "@/lib/report";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -57,6 +57,17 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const image = formData.get("image");
     const context = String(formData.get("context") ?? "").trim().slice(0, 4000);
+    const pageUrlInput = String(formData.get("page_url") ?? "").trim().slice(0, 2048);
+    let pageUrl = "";
+    if (pageUrlInput) {
+      try {
+        const parsedUrl = new URL(pageUrlInput);
+        if (!['http:', 'https:'].includes(parsedUrl.protocol)) throw new Error("Unsupported URL protocol");
+        pageUrl = parsedUrl.toString();
+      } catch {
+        return NextResponse.json({ error: "Enter a complete page URL starting with http:// or https://." }, { status: 400 });
+      }
+    }
     const requestedLanguage = String(formData.get("language") ?? "en");
     const language = requestedLanguage in reportLanguages
       ? reportLanguages[requestedLanguage as keyof typeof reportLanguages]
@@ -93,12 +104,12 @@ export async function POST(request: Request) {
           ],
         },
       ],
-      text: { format: zodTextFormat(reportSchema, "bug_report") },
+      text: { format: zodTextFormat(generatedReportSchema, "bug_report") },
     });
     if (!response.output_parsed) {
       return NextResponse.json({ error: "The screenshot could not be turned into a report." }, { status: 422 });
     }
-    return NextResponse.json({ report: reportSchema.parse(response.output_parsed) });
+    return NextResponse.json({ report: reportSchema.parse({ ...response.output_parsed, page_url: pageUrl }) });
   } catch (error) {
     console.error("Bugshot analysis failed", error);
     if (error instanceof OpenAI.APIError && error.status === 429) {

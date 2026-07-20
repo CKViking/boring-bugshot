@@ -10,6 +10,8 @@ const copy = {
     reportType: "Report type",
     category: "Category",
     priority: "Priority",
+    pageUrl: "Page URL",
+    screenshot: "Screenshot",
     problem: "Problem",
     impact: "Impact",
     fix: "Suggested fix",
@@ -22,6 +24,8 @@ const copy = {
     reportType: "Report-Typ",
     category: "Kategorie",
     priority: "Priorität",
+    pageUrl: "Seiten-URL",
+    screenshot: "Screenshot",
     problem: "Problem",
     impact: "Auswirkung",
     fix: "Lösungsvorschlag",
@@ -34,6 +38,8 @@ const copy = {
     reportType: "Tipo de informe",
     category: "Categoría",
     priority: "Prioridad",
+    pageUrl: "URL de la página",
+    screenshot: "Captura de pantalla",
     problem: "Problema",
     impact: "Impacto",
     fix: "Solución sugerida",
@@ -46,6 +52,8 @@ const copy = {
     reportType: "Rapporttype",
     category: "Categorie",
     priority: "Prioriteit",
+    pageUrl: "Pagina-URL",
+    screenshot: "Schermafbeelding",
     problem: "Probleem",
     impact: "Impact",
     fix: "Voorgestelde oplossing",
@@ -90,7 +98,7 @@ function displayValue(value: string) {
   return pdfSafeText(value.replaceAll("_", " "));
 }
 
-export function createReportPdf(report: BugReport, language: PdfLanguage = "en") {
+export function createReportPdf(report: BugReport, language: PdfLanguage = "en", screenshot?: string) {
   const labels = copy[language] || copy.en;
   const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
   const pageWidth = pdf.internal.pageSize.getWidth();
@@ -169,6 +177,29 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en")
     y += 7;
   }
 
+  function addScreenshot(dataUrl: string) {
+    const properties = pdf.getImageProperties(dataUrl);
+    let imageWidth = contentWidth;
+    let imageHeight = imageWidth * (properties.height / properties.width);
+    const maxImageHeight = 105;
+    if (imageHeight > maxImageHeight) {
+      imageHeight = maxImageHeight;
+      imageWidth = imageHeight * (properties.width / properties.height);
+    }
+    ensureSpace(imageHeight + 17);
+    pdf.setTextColor(...colors.navy);
+    pdf.setFont("helvetica", "bold");
+    pdf.setFontSize(8);
+    pdf.text(labels.screenshot.toUpperCase(), margin, y);
+    y += 3.5;
+    pdf.setDrawColor(...colors.blue);
+    pdf.line(margin, y, pageWidth - margin, y);
+    y += 6;
+    const imageX = margin + (contentWidth - imageWidth) / 2;
+    pdf.addImage(dataUrl, properties.fileType, imageX, y, imageWidth, imageHeight, undefined, "FAST");
+    y += imageHeight + 7;
+  }
+
   addFirstPageHeader();
 
   pdf.setTextColor(...colors.green);
@@ -207,6 +238,8 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en")
   });
   y += 28;
 
+  if (report.page_url) addSection(labels.pageUrl, report.page_url);
+  if (screenshot) addScreenshot(screenshot);
   addSection(labels.problem, report.problem);
   addSection(labels.impact, report.impact);
   addSection(labels.fix, report.fix_suggestion);
@@ -227,7 +260,7 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en")
   return pdf;
 }
 
-export function downloadReportPdf(report: BugReport, language: PdfLanguage = "en") {
-  const pdf = createReportPdf(report, language);
+export function downloadReportPdf(report: BugReport, language: PdfLanguage = "en", screenshot?: string) {
+  const pdf = createReportPdf(report, language, screenshot);
   pdf.save(`${filenameSlug(report.title)}.pdf`);
 }

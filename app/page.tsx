@@ -3,7 +3,7 @@
 import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { BoringWorksSignature } from "@/app/boring-works-signature";
-import { BugReport, categories, priorities, reportToMarkdown, reportTypes } from "@/lib/report";
+import { BugReport, categories, priorities, reportToIssueText, reportToMarkdown, reportTypes } from "@/lib/report";
 
 type SavedReport = BugReport & { id: string; savedAt: string };
 type ReportLanguage = "en" | "de" | "es" | "nl";
@@ -31,21 +31,24 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [context, setContext] = useState("");
+  const [pageUrl, setPageUrl] = useState("");
   const [language, setLanguage] = useState<ReportLanguage>("en");
   const [requestedReportType, setRequestedReportType] = useState<RequestedReportType>("auto");
   const [report, setReport] = useState<BugReport | null>(null);
+  const [reportImage, setReportImage] = useState<File | null>(null);
   const [saved, setSaved] = useState<SavedReport[]>([]);
+  const [pendingRemovalId, setPendingRemovalId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
-  const [reportFeedback, setReportFeedback] = useState<{ source: "save" | "pdf"; type: "success" | "error"; message: string } | null>(null);
+  const [reportFeedback, setReportFeedback] = useState<{ source: "save" | "pdf" | "screenshot"; type: "success" | "error"; message: string } | null>(null);
 
   useEffect(() => {
     const loadSaved = () => {
       try {
         const stored = JSON.parse(localStorage.getItem("bugshot-reports") || "[]") as SavedReport[];
-        setSaved(stored.map((item) => ({ ...item, report_type: item.report_type || "technical" })));
+        setSaved(stored.map((item) => ({ ...item, report_type: item.report_type || "technical", page_url: item.page_url || "" })));
       } catch { setSaved([]); }
       const storedLanguage = localStorage.getItem("bugshot-report-language");
       if (reportLanguages.some((item) => item.code === storedLanguage)) {
@@ -81,13 +84,22 @@ export default function Home() {
 
   async function analyze() {
     if (!file) { setError("Add a screenshot first."); return; }
+    if (pageUrl) {
+      try {
+        const parsedUrl = new URL(pageUrl);
+        if (!["http:", "https:"].includes(parsedUrl.protocol)) throw new Error("Unsupported URL protocol");
+      } catch {
+        setError("Enter a complete page URL starting with http:// or https://.");
+        return;
+      }
+    }
     setLoading(true); setError(""); setNotice("");
-    const body = new FormData(); body.append("image", file); body.append("context", context); body.append("language", language); body.append("report_type", requestedReportType);
+    const body = new FormData(); body.append("image", file); body.append("context", context); body.append("page_url", pageUrl); body.append("language", language); body.append("report_type", requestedReportType);
     try {
       const response = await fetch("/api/analyze", { method: "POST", body });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Analysis failed.");
-      setReport(data.report); setNotice("Report ready. Review and edit before saving.");
+      setReport(data.report); setReportImage(file); setNotice("Report ready. Review and edit before saving.");
       setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (err) { setError(err instanceof Error ? err.message : "Analysis failed."); }
     finally { setLoading(false); }
@@ -100,7 +112,7 @@ export default function Home() {
     setLanguage(value);
     localStorage.setItem("bugshot-report-language", value);
   }
-  function showReportFeedback(source: "save" | "pdf", type: "success" | "error", message: string) {
+  function showReportFeedback(source: "save" | "pdf" | "screenshot", type: "success" | "error", message: string) {
     if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
     setReportFeedback({ source, type, message });
     feedbackTimerRef.current = window.setTimeout(() => setReportFeedback(null), 3200);
@@ -117,17 +129,53 @@ export default function Home() {
       showReportFeedback("save", "error", "Could not save this report. Please try again.");
     }
   }
+  function removeSavedReport(id: string) {
+    if (pendingRemovalId !== id) {
+      setPendingRemovalId(id);
+      return;
+    }
+    try {
+      const next = saved.filter((item) => item.id !== id);
+      localStorage.setItem("bugshot-reports", JSON.stringify(next));
+      setSaved(next);
+      setPendingRemovalId(null);
+    } catch {
+      setError("Could not remove the saved report. Please try again.");
+    }
+  }
+  function fileToDataUrl(image: File) {
+    return new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => typeof reader.result === "string" ? resolve(reader.result) : reject(new Error("Could not read screenshot."));
+      reader.onerror = () => reject(reader.error || new Error("Could not read screenshot."));
+      reader.readAsDataURL(image);
+    });
+  }
   async function downloadPdf() {
     if (!report || pdfLoading) return;
     setPdfLoading(true);
     try {
       const { downloadReportPdf } = await import("@/lib/report-pdf");
-      downloadReportPdf(report, language);
+      const screenshot = reportImage ? await fileToDataUrl(reportImage) : undefined;
+      downloadReportPdf(report, language, screenshot);
       showReportFeedback("pdf", "success", "PDF download started.");
     } catch {
       showReportFeedback("pdf", "error", "Could not create the PDF. Please try again.");
     } finally {
       setPdfLoading(false);
+    }
+  }
+  function downloadScreenshot() {
+    if (!report || !reportImage) return;
+    try {
+      const extension = reportImage.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || "png";
+      const url = URL.createObjectURL(reportImage);
+      const anchor = document.createElement("a");
+      anchor.href = url; anchor.download = `${slug(report.title)}-screenshot.${extension}`; anchor.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
+      showReportFeedback("screenshot", "success", "Screenshot download started. Attach it to your ticket.");
+    } catch {
+      showReportFeedback("screenshot", "error", "Could not download the screenshot. Please try again.");
     }
   }
   function download(filename: string, content: string) {
@@ -155,11 +203,13 @@ export default function Home() {
       <div className="controls">
         <label htmlFor="context">A little context <span>optional</span></label>
         <textarea id="context" value={context} maxLength={4000} onChange={(e) => setContext(e.target.value)} placeholder="What were you trying to do? Where did this happen?" />
+        <label htmlFor="page-url">Page URL <span>optional · added to exports</span></label>
+        <input id="page-url" type="url" value={pageUrl} maxLength={2048} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://example.com/page" />
         <div className="request-settings">
           <label className="report-type-select" htmlFor="report-type">Report type <span>choose per request</span><select id="report-type" value={requestedReportType} onChange={(e) => setRequestedReportType(e.target.value as RequestedReportType)}>{requestedReportTypes.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select><small>{requestedReportTypes.find((item) => item.code === requestedReportType)?.description}</small></label>
           <label className="language-select" htmlFor="report-language">Language <span>remembered</span><select id="report-language" value={language} onChange={(e) => chooseLanguage(e.target.value as ReportLanguage)}>{reportLanguages.map((item) => <option key={item.code} value={item.code}>{item.short} · {item.label}</option>)}</select></label>
         </div>
-        <p className="privacy"><strong>Before you analyze:</strong> Your screenshot, optional context, report type, and output language are sent to OpenAI through our server to create the report. Bugshot does not add the screenshot to your saved browser workspace. Do not upload confidential or personal data unless you are authorized to share it. <Link href="/datenschutz">Privacy details</Link></p>
+        <p className="privacy"><strong>Before you analyze:</strong> Your screenshot, optional context, report type, and output language are sent to OpenAI through our server to create the report. The optional page URL is added to the report without being sent to OpenAI. Bugshot does not add the screenshot to your saved browser workspace. Do not upload confidential or personal data unless you are authorized to share it. <Link href="/datenschutz">Privacy details</Link></p>
         <button className="primary" onClick={analyze} disabled={loading || !file}>{loading ? "Reading the screenshot…" : "Create bug report →"}</button>
         {error && <p className="message error">{error}</p>}{notice && <p className="message success">{notice}</p>}
       </div>
@@ -167,9 +217,10 @@ export default function Home() {
     </div>
     <section className="build-strip"><div><strong>Built with Codex for OpenAI Build Week.</strong><p>GPT-5.6 reads the screenshot. Structured Outputs turn the result into an editable, server-validated report — a focused workflow instead of a chat wrapper.</p></div></section>
     {report && <section className="report" id="report">
-      <div className="section-heading"><div><p className="eyebrow">STRUCTURED OUTPUT</p><h2>Review the report</h2></div><div className="report-actions"><div className="actions"><button className={reportFeedback?.source === "save" && reportFeedback.type === "success" ? "is-saved" : ""} onClick={saveReport}>{reportFeedback?.source === "save" && reportFeedback.type === "success" ? "Saved ✓" : "Save"}</button><button className="pdf-action" onClick={downloadPdf} disabled={pdfLoading}>{pdfLoading ? "Creating PDF…" : "PDF ↓"}</button><button onClick={() => download(`${slug(report.title)}.md`, reportToMarkdown(report))}>Markdown ↓</button><button onClick={() => download(`${slug(report.title)}-issue.md`, report.ticket_text)}>Issue text ↓</button></div>{reportFeedback && <p className={`report-feedback ${reportFeedback.type}`} role="status" aria-live="polite">{reportFeedback.type === "success" ? "✓ " : ""}{reportFeedback.message}</p>}</div></div>
+      <div className="section-heading"><div><p className="eyebrow">STRUCTURED OUTPUT</p><h2>Review the report</h2></div><div className="report-actions"><div className="actions"><button className={reportFeedback?.source === "save" && reportFeedback.type === "success" ? "is-saved" : ""} onClick={saveReport}>{reportFeedback?.source === "save" && reportFeedback.type === "success" ? "Saved ✓" : "Save"}</button><button className="pdf-action" onClick={downloadPdf} disabled={pdfLoading}>{pdfLoading ? "Creating PDF…" : "PDF ↓"}</button><button onClick={() => download(`${slug(report.title)}.md`, reportToMarkdown(report))}>Markdown ↓</button><button onClick={() => download(`${slug(report.title)}-issue.md`, reportToIssueText(report))}>Issue text ↓</button><button onClick={downloadScreenshot} disabled={!reportImage} title={reportImage ? "Download the original screenshot to attach to your ticket." : "Screenshots are not stored with saved reports."}>Screenshot ↓</button></div>{reportFeedback && <p className={`report-feedback ${reportFeedback.type}`} role="status" aria-live="polite">{reportFeedback.type === "success" ? "✓ " : ""}{reportFeedback.message}</p>}</div></div>
       <div className="report-grid">
         <label className="wide">Title<input value={report.title} onChange={(e) => update("title", e.target.value)} /></label>
+        <label className="wide">Page URL<input type="url" value={report.page_url} onChange={(e) => update("page_url", e.target.value)} placeholder="Not supplied" /></label>
         <label>Report type<select value={report.report_type} onChange={(e) => update("report_type", e.target.value)}>{reportTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label>Category<select value={report.category} onChange={(e) => update("category", e.target.value)}>{categories.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label>Priority<select value={report.priority} onChange={(e) => update("priority", e.target.value)}>{priorities.map((item) => <option key={item}>{item}</option>)}</select></label>
@@ -208,8 +259,8 @@ export default function Home() {
     </section>
     <section className="workspace" id="workspace">
       <div className="section-heading"><div><p className="eyebrow">THIS BROWSER</p><h2>Saved reports</h2></div></div>
-      {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <button key={item.id} onClick={() => { setReport(item); setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 0); }}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}</small></button>)}</div>}
+      {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <article className="saved-card" key={item.id}><button className="saved-open" onClick={() => { setPendingRemovalId(null); setReport(item); setReportImage(null); setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 0); }}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}</small></button><button className={`saved-remove ${pendingRemovalId === item.id ? "is-confirming" : ""}`} onClick={() => removeSavedReport(item.id)} aria-label={`${pendingRemovalId === item.id ? "Confirm removing" : "Remove"} ${item.title} from saved reports`}>{pendingRemovalId === item.id ? "Confirm remove" : "Remove"}</button></article>)}</div>}
     </section>
-    <footer><BoringWorksSignature withTagline /><nav><a href="#top">Top</a><a href="#openai-core">OpenAI core</a><a href="#workspace">Workspace</a><Link href="/impressum">Impressum</Link><Link href="/datenschutz">Datenschutz</Link><Link className="demo-link" href="/demo">Demo lab</Link></nav></footer>
+    <footer><BoringWorksSignature withTagline /><nav><a href="#top" target="_blank" rel="noreferrer">Top</a><a href="#openai-core" target="_blank" rel="noreferrer">OpenAI core</a><a href="#workspace" target="_blank" rel="noreferrer">Workspace</a><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link><Link className="demo-link" href="/demo" target="_blank" rel="noreferrer">Demo lab</Link></nav></footer>
   </main>;
 }

@@ -37,6 +37,6 @@ export default function ImpressumPage() {
         48143 Münster
       </address>
     </article>
-    <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/">Tool</Link><Link href="/datenschutz">Datenschutz</Link></nav></footer>
+    <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/" target="_blank" rel="noreferrer">Tool</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link></nav></footer>
   </main>;
 }

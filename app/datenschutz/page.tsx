@@ -31,6 +31,7 @@ export default function DatenschutzPage() {
 
       <h2>3. Screenshot-Analyse mit OpenAI</h2>
       <p>Erst wenn du die Analyse über „Create bug report“ startest, übermittelt Bugshot den ausgewählten Screenshot, den optional eingetragenen Kontext, den gewählten Report-Typ und die Ausgabesprache an die OpenAI API. OpenAI verarbeitet diese Angaben, um den angeforderten strukturierten Bug Report zu erzeugen. Abhängig vom Screenshot oder Kontext können dabei auch personenbezogene Daten enthalten sein.</p>
+      <p>Eine optional eingetragene Seiten-URL wird vom Bugshot-Server validiert und unverändert als Metadatum in den Report und seine Exporte übernommen. Sie wird nicht an OpenAI übermittelt.</p>
       <p>Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Verarbeitung zur Bereitstellung der von dir angeforderten Analyse erforderlich ist. Ohne die Übermittlung an OpenAI kann die Analysefunktion nicht angeboten werden.</p>
       <p>Dienstleister für Nutzer im Europäischen Wirtschaftsraum: OpenAI Ireland Ltd., 1st Floor, The Liffey Trust Centre, 117–126 Sheriff Street Upper, Dublin 1, D01 YC43, Irland. OpenAI handelt bei API-Kundendaten nach seinem Data Processing Addendum als Auftragsverarbeiter. Der API-Aufruf ist durch Bugshot mit <code>store: false</code> konfiguriert. OpenAI weist dennoch darauf hin, dass Missbrauchsüberwachungsprotokolle standardmäßig Inhalte und Metadaten enthalten und bis zu 30 Tage aufbewahrt werden können, sofern keine längere gesetzliche Aufbewahrung erforderlich ist.</p>
       <p>OpenAI verwendet Eingaben und Ausgaben der API nach eigenen Angaben standardmäßig nicht zum Training seiner Modelle, sofern der API-Kontoinhaber nicht ausdrücklich einer Datenfreigabe zugestimmt hat. Weitere Informationen: <a href="https://platform.openai.com/docs/models/default-usage-policies-by-endpoint" target="_blank" rel="noreferrer">OpenAI API data controls</a> und <a href="https://openai.com/policies/data-processing-addendum/" target="_blank" rel="noreferrer">OpenAI Data Processing Addendum</a>.</p>
@@ -48,6 +49,6 @@ export default function DatenschutzPage() {
       <h2>7. Stand</h2>
       <p>19. Juli 2026</p>
     </article>
-    <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/">Tool</Link><Link href="/impressum">Impressum</Link></nav></footer>
+    <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/" target="_blank" rel="noreferrer">Tool</Link><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link></nav></footer>
   </main>;
 }

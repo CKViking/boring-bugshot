@@ -31,6 +31,7 @@ Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und ec
 - Screenshot-Analyse ueber die Netlify-Function und OpenAI API ist erfolgreich
 - Save-Feedback sowie PDF- und Markdown-Download funktionieren im Production-Deploy
 - Netlify Function Logs zeigen abgeschlossene Aufrufe ohne sichtbare Fehler
+- Engineer-Feedback lokal geprueft: Footer-Links in neuen Tabs, Zwei-Klick-Loeschen, eigenes URL-Feld sowie Screenshot in PDF und als separate Ticket-Anlage
 
 ## Hackathon-Fokus
 

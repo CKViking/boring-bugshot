@@ -14,11 +14,12 @@ Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/bor
 
 - Screenshot-Upload, Drag-and-drop und direktes Einfuegen aus der Zwischenablage mit `Ctrl+V`
 - optionaler Kontext
+- optionale, separat validierte Seiten-URL in Report, PDF, Markdown und Issue-Text; die URL wird nicht an OpenAI gesendet
 - serverseitige OpenAI-Vision-Analyse ueber die Responses API
 - validierte Structured Outputs
 - editierbarer Bug Report
-- Browser-Workspace fuer bis zu 30 Reports
-- Download als gestaltete PDF, Markdown oder Issue-Text
+- Browser-Workspace fuer bis zu 30 Reports mit Zwei-Klick-Funktion zum Entfernen
+- Download als gestaltete PDF mit Screenshot, Markdown, Issue-Text oder separate Screenshot-Anlage
 - Ausgabesprache waehlen: Englisch, Deutsch, Spanisch oder Niederlaendisch
 - Report-Perspektive waehlen: Automatic, Technical, Design, UX oder Accessibility
 - fokussierte Produktseite mit sichtbarem OpenAI-Build-Week- und GPT-5.6-Kern
@@ -88,7 +89,7 @@ Die Einstellungen fuer Build, Publish-Verzeichnis und Node.js sind zusaetzlich i
 
 - Uploads sind wegen des Netlify-Limits auf 4 MB begrenzt.
 - Reports werden im `localStorage` des jeweiligen Browsers gespeichert, nicht in einer gemeinsamen Datenbank.
-- Screenshots werden an die OpenAI API gesendet, von Bugshot selbst aber nicht gespeichert.
+- Screenshots werden an die OpenAI API gesendet, von Bugshot selbst aber nicht gespeichert. PDF- und Screenshot-Anlage sind deshalb nur fuer den aktuell analysierten Report verfuegbar; gespeicherte Reports enthalten das Bild nicht.
 - Jeder Analyseaufruf verbraucht das OpenAI-API-Budget des Betreibers.
 - Ein einfaches serverseitiges Rate Limit bremst wiederholte Aufrufe pro Verbindung. Fuer eine breite oeffentliche Freigabe bleibt dauerhafter Missbrauchsschutz erforderlich.
 - Pro Screenshot wird derzeit ein Report fuer den wichtigsten sichtbaren Fehler erzeugt.
