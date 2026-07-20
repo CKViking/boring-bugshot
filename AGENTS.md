@@ -60,6 +60,7 @@ Moegliche Prioritaeten:
 
 - critical
 - important
+- medium
 - nice_to_have
 
 ## MVP-Scope

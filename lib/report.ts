@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const categories = ["layout", "copy", "accessibility", "ux", "visual_hierarchy", "responsiveness", "other"] as const;
-export const priorities = ["critical", "important", "nice_to_have"] as const;
+export const priorities = ["critical", "important", "medium", "nice_to_have"] as const;
 export const reportTypes = ["technical", "design", "ux", "accessibility"] as const;
 
 export const generatedReportSchema = z.object({

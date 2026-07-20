@@ -34,6 +34,9 @@ Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und ec
 - Engineer-Feedback lokal geprueft: Footer-Links in neuen Tabs, Zwei-Klick-Loeschen, eigenes URL-Feld sowie Screenshot in PDF und als separate Ticket-Anlage
 - lokale Screenshot-Persistenz ueber IndexedDB implementiert; Saved Reports laden das Bild erneut und entfernen es beim Loeschen gemeinsam mit dem Report
 - Formularhoehe, Labelabstaende und Zwischenueberschriften behutsam verdichtet; Claim-Umbruch und Zielgruppen-Icons visuell geprueft
+- README enthaelt den expliziten Abschnitt `How I used Codex and GPT-5.6` mit Codex-Beitrag, menschlichen Produktentscheidungen und technischem GPT-5.6-Kern
+- Priority-Schema um `medium` erweitert und mit klaren Modellkriterien zwischen `important` und `nice_to_have` eingeordnet
+- PDF-Erstseitenumbruch korrigiert; Screenshot mit dezentem Rahmen und Schatten visuell gerendert und geprueft
 
 ## Hackathon-Fokus
 

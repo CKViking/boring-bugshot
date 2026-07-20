@@ -150,7 +150,9 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en",
   }
 
   function addSection(label: string, value: string) {
-    const lines = pdf.splitTextToSize(pdfSafeText(value), contentWidth) as string[];
+    pdf.setFont("helvetica", "normal");
+    pdf.setFontSize(10.2);
+    const lines = pdf.splitTextToSize(pdfSafeText(value), contentWidth - 2) as string[];
     ensureSpace(19);
     pdf.setTextColor(...colors.navy);
     pdf.setFont("helvetica", "bold");
@@ -179,14 +181,16 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en",
 
   function addScreenshot(dataUrl: string) {
     const properties = pdf.getImageProperties(dataUrl);
-    let imageWidth = contentWidth;
+    const framePadding = 1.5;
+    const shadowOffset = 1.2;
+    let imageWidth = contentWidth - framePadding * 2 - shadowOffset;
     let imageHeight = imageWidth * (properties.height / properties.width);
     const maxImageHeight = 105;
     if (imageHeight > maxImageHeight) {
       imageHeight = maxImageHeight;
       imageWidth = imageHeight * (properties.width / properties.height);
     }
-    ensureSpace(imageHeight + 17);
+    ensureSpace(imageHeight + 20);
     pdf.setTextColor(...colors.navy);
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(8);
@@ -196,8 +200,18 @@ export function createReportPdf(report: BugReport, language: PdfLanguage = "en",
     pdf.line(margin, y, pageWidth - margin, y);
     y += 6;
     const imageX = margin + (contentWidth - imageWidth) / 2;
+    const frameX = imageX - framePadding;
+    const frameY = y - framePadding;
+    const frameWidth = imageWidth + framePadding * 2;
+    const frameHeight = imageHeight + framePadding * 2;
+    pdf.setFillColor(224, 229, 235);
+    pdf.rect(frameX + shadowOffset, frameY + shadowOffset, frameWidth, frameHeight, "F");
+    pdf.setFillColor(...colors.white);
+    pdf.setDrawColor(184, 195, 207);
+    pdf.setLineWidth(0.25);
+    pdf.rect(frameX, frameY, frameWidth, frameHeight, "FD");
     pdf.addImage(dataUrl, properties.fileType, imageX, y, imageWidth, imageHeight, undefined, "FAST");
-    y += imageHeight + 7;
+    y += imageHeight + framePadding + shadowOffset + 8;
   }
 
   addFirstPageHeader();

@@ -8,7 +8,7 @@ Lauffaehige MVP-Version eines visuellen Bug-Reporting-Tools fuer die OpenAI Buil
 
 **[boring-bugshot.netlify.app](https://boring-bugshot.netlify.app/)**
 
-Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/boring-bugshot](https://github.com/CKViking/boring-bugshot) verbunden. Ein vollstaendiger Smoke-Test am 19. Juli 2026 bestaetigte Screenshot-Analyse, GPT-5.6 Structured Output, Bearbeitung, lokales Speichern, PDF- und Markdown-Export sowie Demo Lab, Impressum und Datenschutz.
+Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/boring-bugshot](https://github.com/CKViking/boring-bugshot) verbunden. Ein vollstaendiger Smoke-Test am 20. Juli 2026 bestaetigte Screenshot-Analyse, GPT-5.6 Structured Output, Bearbeitung, lokales Speichern, PDF- und Markdown-Export sowie Demo Lab, Impressum und Datenschutz.
 
 ## Funktionen
 
@@ -22,9 +22,19 @@ Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/bor
 - Download als gestaltete PDF mit Screenshot, Markdown, Issue-Text oder separate Screenshot-Anlage
 - Ausgabesprache waehlen: Englisch, Deutsch, Spanisch oder Niederlaendisch
 - Report-Perspektive waehlen: Automatic, Technical, Design, UX oder Accessibility
+- vierstufige Priorisierung: Critical, Important, Medium oder Nice to have
 - fokussierte Produktseite mit sichtbarem OpenAI-Build-Week- und GPT-5.6-Kern
+- erweiterte Erklaerung des Vision-, Validierungs-, Review- und Export-Flows direkt auf der Produktseite
 - englisches Demo Lab unter `/demo` mit vier reproduzierbaren Beispiel-Bugs
 - originales boring-works-Favicon sowie dezentes boring-works-Wortzeichen als Absender im Footer
+
+## How I used Codex and GPT-5.6
+
+I used Codex as my development partner throughout OpenAI Build Week. Codex helped me turn product decisions into a working Next.js application, implement the server-side OpenAI integration, define and validate the report schema, add multilingual reports and PDF export, create the Demo Lab, and test the public Netlify deployment.
+
+I made the key product and design decisions, including keeping the workflow focused, using structured report data instead of a chat interface, making every field editable, and allowing human review without requiring it.
+
+GPT-5.6 is the product core. It analyzes the screenshot and optional context using vision input. The result is returned through Structured Outputs and validated against a Zod schema on the server before it is displayed.
 
 ## Lokal starten
 

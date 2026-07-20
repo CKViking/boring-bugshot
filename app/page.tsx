@@ -310,6 +310,18 @@ export default function Home() {
       <div className="section-heading"><div><p className="eyebrow">THIS BROWSER</p><h2>Saved reports</h2></div></div>
       {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <article className="saved-card" key={item.id}><button className="saved-open" onClick={() => openSavedReport(item)}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}{item.hasScreenshot ? " · Screenshot saved" : ""}</small></button><button className={`saved-remove ${pendingRemovalId === item.id ? "is-confirming" : ""}`} onClick={() => removeSavedReport(item.id)} aria-label={`${pendingRemovalId === item.id ? "Confirm removing" : "Remove"} ${item.title} from saved reports`}>{pendingRemovalId === item.id ? "Confirm remove" : "Remove"}</button></article>)}</div>}
     </section>
+    <section className="process" id="process">
+      <div className="process-intro"><div><p className="eyebrow">HOW BUGSHOT WORKS</p><h2>A focused path from visual evidence to a usable ticket.</h2></div><p>Bugshot is built for the handoff, not for a long conversation. It combines visual analysis with a constrained report structure, then leaves the final wording in human hands.</p></div>
+      <div className="process-layout">
+        <ol className="process-flow">
+          <li><span>01</span><div><h3>Add the evidence</h3><p>Paste, drop, or choose one screenshot. Optional context can clarify the intent; a page URL stays separate as report metadata.</p></div></li>
+          <li><span>02</span><div><h3>Read the visible issue</h3><p>GPT-5.6 uses vision input to inspect what is actually shown. Automatic mode selects the most useful technical, design, UX, or accessibility perspective.</p></div></li>
+          <li><span>03</span><div><h3>Constrain the result</h3><p>Structured Outputs place the response into a fixed report schema. The server validates that structure with Zod before the interface accepts it.</p></div></li>
+          <li><span>04</span><div><h3>Review and hand off</h3><p>Every field remains editable. Save the report and screenshot locally, then export PDF, Markdown, issue text, or the original image.</p></div></li>
+        </ol>
+        <aside className="process-principles"><h3>What makes the result useful</h3><ul><li><strong>One primary issue</strong><span>A focused report instead of an unfocused list.</span></li><li><strong>Evidence over guesses</strong><span>Visible findings are separated from unverified technical causes.</span></li><li><strong>Clear triage</strong><span>Category, report type, and a four-level priority scale support the next decision.</span></li><li><strong>Human control</strong><span>Edit before saving or exporting; review is available without becoming a required extra workflow.</span></li><li><strong>Browser-local workspace</strong><span>Saved reports and screenshots stay on the current device.</span></li></ul></aside>
+      </div>
+    </section>
     <footer><BoringWorksSignature withTagline /><nav><a href="#top" target="_blank" rel="noreferrer">Top</a><a href="#openai-core" target="_blank" rel="noreferrer">OpenAI core</a><a href="#workspace" target="_blank" rel="noreferrer">Workspace</a><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link><Link className="demo-link" href="/demo" target="_blank" rel="noreferrer">Demo lab</Link></nav></footer>
   </main>;
 }
