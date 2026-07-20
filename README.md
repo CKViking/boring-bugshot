@@ -8,7 +8,7 @@ Lauffaehige MVP-Version eines visuellen Bug-Reporting-Tools fuer die OpenAI Buil
 
 **[boring-bugshot.netlify.app](https://boring-bugshot.netlify.app/)**
 
-Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/boring-bugshot](https://github.com/CKViking/boring-bugshot) verbunden. Ein vollstaendiger Smoke-Test am 20. Juli 2026 bestaetigte Screenshot-Analyse, GPT-5.6 Structured Output, Bearbeitung, lokales Speichern, PDF- und Markdown-Export sowie Demo Lab, Impressum und Datenschutz.
+Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/boring-bugshot](https://github.com/CKViking/boring-bugshot) verbunden. Ein vollstaendiger Smoke-Test am 20. Juli 2026 bestaetigte Screenshot-Analyse, GPT-5.6 Structured Output, Bearbeitung, lokales Speichern, PDF- und Markdown-Export sowie Demo Lab und die zweisprachigen Seiten fuer Impressum und Datenschutz.
 
 ## Funktionen
 
@@ -23,9 +23,12 @@ Der oeffentliche Netlify-Stand ist mit `main` im GitHub-Repository [CKViking/bor
 - Ausgabesprache waehlen: Englisch, Deutsch, Spanisch oder Niederlaendisch
 - Report-Perspektive waehlen: Automatic, Technical, Design, UX oder Accessibility
 - vierstufige Priorisierung: Critical, Important, Medium oder Nice to have
+- `Clear form` setzt Screenshot, Kontext, URL und Report-Perspektive fuer eine neue Anfrage zurueck, ohne Ausgabesprache, erzeugten Report oder Saved Reports zu loeschen
+- nach einer erfolgreichen Analyse macht `Create report again` einen erneuten Aufruf mit unveraenderten Eingaben explizit
 - fokussierte Produktseite mit sichtbarem OpenAI-Build-Week- und GPT-5.6-Kern
 - erweiterte Erklaerung des Vision-, Validierungs-, Review- und Export-Flows direkt auf der Produktseite
 - englisches Demo Lab unter `/demo` mit vier reproduzierbaren Beispiel-Bugs
+- Impressum und Datenschutz jeweils mit vollstaendiger deutscher und englischer Fassung auf derselben Seite; Deutsch steht zuerst
 - originales boring-works-Favicon sowie dezentes boring-works-Wortzeichen als Absender im Footer
 
 ## How I used Codex and GPT-5.6
@@ -109,6 +112,8 @@ Die Einstellungen fuer Build, Publish-Verzeichnis und Node.js sind zusaetzlich i
 - Die oeffentliche Seite stellt Bugshot und den OpenAI-Kern in den Vordergrund; die boring-Dachmarke bleibt dezent.
 - Die technische Umsetzung wird direkt benannt: GPT-5.6-Bildinput, Responses API, Structured Outputs und serverseitige Zod-Validierung.
 - Die Responsive-Demo zeigt den 390-Pixel-Viewport bewusst in einem neutralen Desktop-Browser-Rahmen mit sichtbaren Scrollbars.
+- Der Anfragebereich laesst sich fuer den naechsten Report gezielt leeren; die einmal gewaehlte Sprache und vorhandene Arbeit bleiben dabei erhalten.
+- Rechtliche Angaben und Datenschutzhinweise sind fuer deutsch- und englischsprachige Tester ohne zusaetzliche Seitennavigation lesbar.
 
 ## Technische Pruefung
 

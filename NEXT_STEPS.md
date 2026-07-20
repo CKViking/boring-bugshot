@@ -65,3 +65,13 @@ Status: umgesetzt.
 - Save-Feedback sowie PDF- und Markdown-Download wurden auf der oeffentlichen Version erfolgreich getestet.
 
 Status: MVP oeffentlich und end-to-end funktionsfaehig.
+
+## Finaler Einreichungsstand vom 20. Juli 2026
+
+- Der Anfragebereich bietet neben dem primaeren Analyse-Button die zurueckhaltende Aktion `Clear form`.
+- Der Reset entfernt Screenshot, Kontext, Seiten-URL und die anfragespezifische Report-Perspektive, behaelt aber die gemerkte Ausgabesprache sowie erzeugte und gespeicherte Reports.
+- Nach einem erfolgreichen Aufruf benennt `Create report again` einen erneuten Aufruf mit unveraenderten Eingaben ausdruecklich.
+- Impressum und Datenschutz stehen auf ihren bestehenden Seiten jeweils zuerst auf Deutsch und danach vollstaendig auf Englisch bereit.
+- README, Pre-Launch-Checkliste und zentraler Lab-Stand bilden denselben aktuellen Funktions-, Datenschutz- und Deployment-Stand ab.
+
+Status: Technische Einreichungsversion abgeschlossen; offen bleiben Demo-Video und finale Projektbeschreibung.

@@ -1,6 +1,6 @@
 # boring Bugshot - Pre-Launch-Check
 
-Stand: 19. Juli 2026
+Stand: 20. Juli 2026
 
 ## Ergebnis
 
@@ -37,6 +37,8 @@ Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und ec
 - README enthaelt den expliziten Abschnitt `How I used Codex and GPT-5.6` mit Codex-Beitrag, menschlichen Produktentscheidungen und technischem GPT-5.6-Kern
 - Priority-Schema um `medium` erweitert und mit klaren Modellkriterien zwischen `important` und `nice_to_have` eingeordnet
 - PDF-Erstseitenumbruch korrigiert; Screenshot mit dezentem Rahmen und Schatten visuell gerendert und geprueft
+- `Clear form` leert Screenshot, Kontext, URL und Report-Perspektive, behaelt aber Sprache, aktuellen Report und Saved Reports; wiederholte Analyse wird als `Create report again` kenntlich gemacht
+- Impressum und Datenschutz enthalten Deutsch zuerst und darunter jeweils eine vollstaendige englische Fassung
 
 ## Hackathon-Fokus
 

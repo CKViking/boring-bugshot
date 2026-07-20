@@ -58,6 +58,7 @@ export default function Home() {
   const [notice, setNotice] = useState("");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [reportFeedback, setReportFeedback] = useState<{ source: "save" | "pdf" | "screenshot"; type: "success" | "error"; message: string } | null>(null);
+  const [hasAnalyzedCurrentForm, setHasAnalyzedCurrentForm] = useState(false);
 
   useEffect(() => {
     const loadSaved = () => {
@@ -81,7 +82,7 @@ export default function Home() {
     if (!acceptedImageTypes.has(next.type)) { setError("Use a PNG, JPEG, WebP, or GIF image."); return; }
     if (next.size > maxImageSize) { setError("The screenshot must be 4 MB or smaller."); return; }
     if (preview) URL.revokeObjectURL(preview);
-    setFile(next); setPreview(URL.createObjectURL(next)); setError(""); setNotice("");
+    setFile(next); setPreview(URL.createObjectURL(next)); setError(""); setNotice(""); setHasAnalyzedCurrentForm(false);
   }, [preview]);
 
   useEffect(() => {
@@ -114,7 +115,7 @@ export default function Home() {
       const response = await fetch("/api/analyze", { method: "POST", body });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Analysis failed.");
-      setReport(data.report); setReportImage(file); setNotice("Report ready. Review and edit before saving.");
+      setReport(data.report); setReportImage(file); setNotice("Report ready. Review and edit before saving."); setHasAnalyzedCurrentForm(true);
       setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 50);
     } catch (err) { setError(err instanceof Error ? err.message : "Analysis failed."); }
     finally { setLoading(false); }
@@ -125,7 +126,20 @@ export default function Home() {
   }
   function chooseLanguage(value: ReportLanguage) {
     setLanguage(value);
+    setHasAnalyzedCurrentForm(false);
     localStorage.setItem("bugshot-report-language", value);
+  }
+  function clearForm() {
+    if (loading) return;
+    setFile(null);
+    setPreview("");
+    setContext("");
+    setPageUrl("");
+    setRequestedReportType("auto");
+    setHasAnalyzedCurrentForm(false);
+    setError("");
+    setNotice("Form cleared. Ready for a new screenshot.");
+    if (inputRef.current) inputRef.current.value = "";
   }
   function showReportFeedback(source: "save" | "pdf" | "screenshot", type: "success" | "error", message: string) {
     if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
@@ -232,6 +246,7 @@ export default function Home() {
     const anchor = document.createElement("a"); anchor.href = url; anchor.download = filename; anchor.click(); URL.revokeObjectURL(url);
   }
   function slug(value: string) { return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "bug-report"; }
+  const canClearForm = Boolean(file || context || pageUrl || requestedReportType !== "auto");
 
   return <main>
     <header className="topbar"><div className="header-inner"><a className="brand" href="#top"><strong>boring</strong><span>Bugshot</span></a><nav><a href="#how">How it works</a><a href="#output">What you get</a><a href="#openai-core">OpenAI core</a><a href="#workspace">Workspace <b>{saved.length}</b></a><a className="nav-cta" href="#tool">Try Bugshot</a></nav></div></header>
@@ -251,15 +266,15 @@ export default function Home() {
       </div>
       <div className="controls">
         <label htmlFor="context">A little context <span>optional</span></label>
-        <textarea id="context" value={context} maxLength={4000} onChange={(e) => setContext(e.target.value)} placeholder="What were you trying to do? Where did this happen?" />
+        <textarea id="context" value={context} maxLength={4000} onChange={(e) => { setContext(e.target.value); setHasAnalyzedCurrentForm(false); }} placeholder="What were you trying to do? Where did this happen?" />
         <label htmlFor="page-url">Page URL <span>optional · added to exports</span></label>
-        <input id="page-url" type="url" value={pageUrl} maxLength={2048} onChange={(e) => setPageUrl(e.target.value)} placeholder="https://example.com/page" />
+        <input id="page-url" type="url" value={pageUrl} maxLength={2048} onChange={(e) => { setPageUrl(e.target.value); setHasAnalyzedCurrentForm(false); }} placeholder="https://example.com/page" />
         <div className="request-settings">
-          <label className="report-type-select" htmlFor="report-type">Report type <span>choose per request</span><select id="report-type" value={requestedReportType} onChange={(e) => setRequestedReportType(e.target.value as RequestedReportType)}>{requestedReportTypes.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select><small>{requestedReportTypes.find((item) => item.code === requestedReportType)?.description}</small></label>
+          <label className="report-type-select" htmlFor="report-type">Report type <span>choose per request</span><select id="report-type" value={requestedReportType} onChange={(e) => { setRequestedReportType(e.target.value as RequestedReportType); setHasAnalyzedCurrentForm(false); }}>{requestedReportTypes.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select><small>{requestedReportTypes.find((item) => item.code === requestedReportType)?.description}</small></label>
           <label className="language-select" htmlFor="report-language">Language <span>remembered</span><select id="report-language" value={language} onChange={(e) => chooseLanguage(e.target.value as ReportLanguage)}>{reportLanguages.map((item) => <option key={item.code} value={item.code}>{item.short} · {item.label}</option>)}</select></label>
         </div>
         <p className="privacy"><strong>Before you analyze:</strong> Your screenshot, optional context, report type, and output language are sent to OpenAI through our server to create the report. The optional page URL is not sent to OpenAI. If you save the result, its report and screenshot stay only in this browser on this device; removing the saved report deletes both. Do not upload confidential or personal data unless you are authorized to share it. <Link href="/datenschutz" target="_blank" rel="noreferrer">Privacy details</Link></p>
-        <button className="primary" onClick={analyze} disabled={loading || !file}>{loading ? "Reading the screenshot…" : "Create bug report →"}</button>
+        <div className="form-actions"><button className="primary" onClick={analyze} disabled={loading || !file}>{loading ? "Reading the screenshot…" : hasAnalyzedCurrentForm ? "Create report again →" : "Create bug report →"}</button><button className="clear-form" type="button" onClick={clearForm} disabled={loading || !canClearForm} title="Remove the current screenshot and reset the request fields. Generated and saved reports are not deleted.">Clear form</button></div>
         {error && <p className="message error">{error}</p>}{notice && <p className="message success">{notice}</p>}
       </div>
     </section>
