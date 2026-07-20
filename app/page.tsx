@@ -4,10 +4,12 @@ import { ChangeEvent, DragEvent, useCallback, useEffect, useRef, useState } from
 import Link from "next/link";
 import { BoringWorksSignature } from "@/app/boring-works-signature";
 import { BugReport, categories, priorities, reportToIssueText, reportToMarkdown, reportTypes } from "@/lib/report";
+import { deleteScreenshot, getScreenshot, saveScreenshot } from "@/lib/screenshot-store";
 
-type SavedReport = BugReport & { id: string; savedAt: string };
+type SavedReport = BugReport & { id: string; savedAt: string; hasScreenshot: boolean };
 type ReportLanguage = "en" | "de" | "es" | "nl";
 type RequestedReportType = "auto" | BugReport["report_type"];
+type AudienceIconName = "developers" | "designers" | "freelancers" | "agencies" | "teams" | "projects";
 
 const reportLanguages: { code: ReportLanguage; label: string; short: string }[] = [
   { code: "en", label: "English", short: "EN" },
@@ -24,6 +26,19 @@ const requestedReportTypes: { code: RequestedReportType; label: string; descript
 ];
 const acceptedImageTypes = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
 const maxImageSize = 4 * 1024 * 1024;
+
+function AudienceIcon({ name }: { name: AudienceIconName }) {
+  const paths: Record<AudienceIconName, React.ReactNode> = {
+    developers: <><path d="m8 8-4 4 4 4" /><path d="m16 8 4 4-4 4" /><path d="m14 5-4 14" /></>,
+    designers: <><path d="m12 3 3 6-3 12-3-12 3-6Z" /><path d="M9 9h6" /></>,
+    freelancers: <><path d="M9 7V5h6v2" /><rect x="3" y="7" width="18" height="13" /><path d="M3 12h18" /><path d="M10 12v2h4v-2" /></>,
+    agencies: <><rect x="4" y="3" width="16" height="18" /><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2M10 21v-3h4v3" /></>,
+    teams: <><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2" /><path d="M3 20c0-4 2-6 6-6s6 2 6 6" /><path d="M15 15c3 0 5 2 5 5" /></>,
+    projects: <><rect x="5" y="4" width="14" height="17" /><path d="M9 4V2h6v2" /><path d="m9 13 2 2 4-5" /></>,
+  };
+
+  return <svg className="audience-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="square" strokeLinejoin="miter">{paths[name]}</svg>;
+}
 
 export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +63,7 @@ export default function Home() {
     const loadSaved = () => {
       try {
         const stored = JSON.parse(localStorage.getItem("bugshot-reports") || "[]") as SavedReport[];
-        setSaved(stored.map((item) => ({ ...item, report_type: item.report_type || "technical", page_url: item.page_url || "" })));
+        setSaved(stored.map((item) => ({ ...item, report_type: item.report_type || "technical", page_url: item.page_url || "", hasScreenshot: Boolean(item.hasScreenshot) })));
       } catch { setSaved([]); }
       const storedLanguage = localStorage.getItem("bugshot-report-language");
       if (reportLanguages.some((item) => item.code === storedLanguage)) {
@@ -117,31 +132,65 @@ export default function Home() {
     setReportFeedback({ source, type, message });
     feedbackTimerRef.current = window.setTimeout(() => setReportFeedback(null), 3200);
   }
-  function saveReport() {
+  async function saveReport() {
     if (!report) return;
+    const id = crypto.randomUUID();
+    let hasScreenshot = false;
     try {
-      const item = { ...report, id: crypto.randomUUID(), savedAt: new Date().toISOString() };
-      const next = [item, ...saved].slice(0, 30);
+      if (reportImage) {
+        try {
+          await saveScreenshot(id, reportImage);
+          hasScreenshot = true;
+        } catch {
+          hasScreenshot = false;
+        }
+      }
+      const item: SavedReport = { ...report, id, savedAt: new Date().toISOString(), hasScreenshot };
+      const allReports = [item, ...saved];
+      const next = allReports.slice(0, 30);
       localStorage.setItem("bugshot-reports", JSON.stringify(next));
       setSaved(next);
-      showReportFeedback("save", "success", "Saved in this browser.");
+      await Promise.allSettled(allReports.slice(30).map((oldReport) => deleteScreenshot(oldReport.id)));
+      showReportFeedback(
+        "save",
+        hasScreenshot || !reportImage ? "success" : "error",
+        hasScreenshot ? "Report and screenshot saved in this browser." : reportImage ? "Report saved, but the screenshot could not be stored." : "Report saved in this browser.",
+      );
     } catch {
+      if (hasScreenshot) await deleteScreenshot(id).catch(() => undefined);
       showReportFeedback("save", "error", "Could not save this report. Please try again.");
     }
   }
-  function removeSavedReport(id: string) {
+  async function removeSavedReport(id: string) {
     if (pendingRemovalId !== id) {
       setPendingRemovalId(id);
       return;
     }
     try {
+      const removedReport = saved.find((item) => item.id === id);
       const next = saved.filter((item) => item.id !== id);
+      if (removedReport?.hasScreenshot) await deleteScreenshot(id);
       localStorage.setItem("bugshot-reports", JSON.stringify(next));
       setSaved(next);
       setPendingRemovalId(null);
     } catch {
       setError("Could not remove the saved report. Please try again.");
     }
+  }
+  async function openSavedReport(item: SavedReport) {
+    setPendingRemovalId(null);
+    setReport(item);
+    setReportImage(null);
+    if (item.hasScreenshot) {
+      try {
+        const screenshot = await getScreenshot(item.id);
+        setReportImage(screenshot);
+        if (!screenshot) showReportFeedback("screenshot", "error", "The saved screenshot could not be found in this browser.");
+      } catch {
+        showReportFeedback("screenshot", "error", "The saved screenshot could not be opened.");
+      }
+    }
+    window.setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 0);
   }
   function fileToDataUrl(image: File) {
     return new Promise<string>((resolve, reject) => {
@@ -190,7 +239,7 @@ export default function Home() {
     <section className="hero">
       <p className="eyebrow"><i aria-hidden="true" /> OPENAI BUILD WEEK PROJECT</p>
       <h1><span>boring</span> Bugshot</h1>
-      <p className="hero-kicker">One screenshot in. One bug report out.</p>
+      <p className="hero-kicker">One screenshot in. One <span className="keep-together">bug report</span> out.</p>
       <p className="lead">Drop in what looks wrong. Get a structured, editable ticket your team can actually use.</p>
       <div className="meta-row"><span>GPT-5.6 vision</span><span>Structured Outputs</span><span>Server-validated schema</span><span>Issue-ready exports</span></div>
     </section>
@@ -209,7 +258,7 @@ export default function Home() {
           <label className="report-type-select" htmlFor="report-type">Report type <span>choose per request</span><select id="report-type" value={requestedReportType} onChange={(e) => setRequestedReportType(e.target.value as RequestedReportType)}>{requestedReportTypes.map((item) => <option key={item.code} value={item.code}>{item.label}</option>)}</select><small>{requestedReportTypes.find((item) => item.code === requestedReportType)?.description}</small></label>
           <label className="language-select" htmlFor="report-language">Language <span>remembered</span><select id="report-language" value={language} onChange={(e) => chooseLanguage(e.target.value as ReportLanguage)}>{reportLanguages.map((item) => <option key={item.code} value={item.code}>{item.short} · {item.label}</option>)}</select></label>
         </div>
-        <p className="privacy"><strong>Before you analyze:</strong> Your screenshot, optional context, report type, and output language are sent to OpenAI through our server to create the report. The optional page URL is added to the report without being sent to OpenAI. Bugshot does not add the screenshot to your saved browser workspace. Do not upload confidential or personal data unless you are authorized to share it. <Link href="/datenschutz">Privacy details</Link></p>
+        <p className="privacy"><strong>Before you analyze:</strong> Your screenshot, optional context, report type, and output language are sent to OpenAI through our server to create the report. The optional page URL is not sent to OpenAI. If you save the result, its report and screenshot stay only in this browser on this device; removing the saved report deletes both. Do not upload confidential or personal data unless you are authorized to share it. <Link href="/datenschutz" target="_blank" rel="noreferrer">Privacy details</Link></p>
         <button className="primary" onClick={analyze} disabled={loading || !file}>{loading ? "Reading the screenshot…" : "Create bug report →"}</button>
         {error && <p className="message error">{error}</p>}{notice && <p className="message success">{notice}</p>}
       </div>
@@ -217,7 +266,7 @@ export default function Home() {
     </div>
     <section className="build-strip"><div><strong>Built with Codex for OpenAI Build Week.</strong><p>GPT-5.6 reads the screenshot. Structured Outputs turn the result into an editable, server-validated report — a focused workflow instead of a chat wrapper.</p></div></section>
     {report && <section className="report" id="report">
-      <div className="section-heading"><div><p className="eyebrow">STRUCTURED OUTPUT</p><h2>Review the report</h2></div><div className="report-actions"><div className="actions"><button className={reportFeedback?.source === "save" && reportFeedback.type === "success" ? "is-saved" : ""} onClick={saveReport}>{reportFeedback?.source === "save" && reportFeedback.type === "success" ? "Saved ✓" : "Save"}</button><button className="pdf-action" onClick={downloadPdf} disabled={pdfLoading}>{pdfLoading ? "Creating PDF…" : "PDF ↓"}</button><button onClick={() => download(`${slug(report.title)}.md`, reportToMarkdown(report))}>Markdown ↓</button><button onClick={() => download(`${slug(report.title)}-issue.md`, reportToIssueText(report))}>Issue text ↓</button><button onClick={downloadScreenshot} disabled={!reportImage} title={reportImage ? "Download the original screenshot to attach to your ticket." : "Screenshots are not stored with saved reports."}>Screenshot ↓</button></div>{reportFeedback && <p className={`report-feedback ${reportFeedback.type}`} role="status" aria-live="polite">{reportFeedback.type === "success" ? "✓ " : ""}{reportFeedback.message}</p>}</div></div>
+      <div className="section-heading"><div><p className="eyebrow">STRUCTURED OUTPUT</p><h2>Review the report</h2></div><div className="report-actions"><div className="actions"><button className={reportFeedback?.source === "save" && reportFeedback.type === "success" ? "is-saved" : ""} onClick={saveReport}>{reportFeedback?.source === "save" && reportFeedback.type === "success" ? "Saved ✓" : "Save"}</button><button className="pdf-action" onClick={downloadPdf} disabled={pdfLoading}>{pdfLoading ? "Creating PDF…" : "PDF ↓"}</button><button onClick={() => download(`${slug(report.title)}.md`, reportToMarkdown(report))}>Markdown ↓</button><button onClick={() => download(`${slug(report.title)}-issue.md`, reportToIssueText(report))}>Issue text ↓</button><button onClick={downloadScreenshot} disabled={!reportImage} title={reportImage ? "Download the original screenshot to attach to your ticket." : "No screenshot is available for this report."}>Screenshot ↓</button></div>{reportFeedback && <p className={`report-feedback ${reportFeedback.type}`} role="status" aria-live="polite">{reportFeedback.type === "success" ? "✓ " : ""}{reportFeedback.message}</p>}</div></div>
       <div className="report-grid">
         <label className="wide">Title<input value={report.title} onChange={(e) => update("title", e.target.value)} /></label>
         <label className="wide">Page URL<input type="url" value={report.page_url} onChange={(e) => update("page_url", e.target.value)} placeholder="Not supplied" /></label>
@@ -251,7 +300,7 @@ export default function Home() {
     </section>
     <section className="audience" id="for-whom">
       <p className="eyebrow">BUILT FOR THE HANDOFF</p>
-      <div className="audience-grid"><h2>For people who find bugs.<br />And people who have to fix them.</h2><div><p>Developers</p><p>Designers</p><p>Freelancers</p><p>Agencies</p><p>Small product teams</p><p>Client projects</p></div></div>
+      <div className="audience-grid"><h2>For people who find bugs.<br />And people who have to fix them.</h2><div><p><AudienceIcon name="developers" /><span>Developers</span></p><p><AudienceIcon name="designers" /><span>Designers</span></p><p><AudienceIcon name="freelancers" /><span>Freelancers</span></p><p><AudienceIcon name="agencies" /><span>Agencies</span></p><p><AudienceIcon name="teams" /><span>Small product teams</span></p><p><AudienceIcon name="projects" /><span>Client projects</span></p></div></div>
     </section>
     <section className="principles" id="openai-core">
       <div><p className="eyebrow">TECHNICAL IMPLEMENTATION</p><h2>Vision in.<br />Structured data out.</h2></div>
@@ -259,7 +308,7 @@ export default function Home() {
     </section>
     <section className="workspace" id="workspace">
       <div className="section-heading"><div><p className="eyebrow">THIS BROWSER</p><h2>Saved reports</h2></div></div>
-      {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <article className="saved-card" key={item.id}><button className="saved-open" onClick={() => { setPendingRemovalId(null); setReport(item); setReportImage(null); setTimeout(() => document.getElementById("report")?.scrollIntoView({ behavior: "smooth" }), 0); }}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}</small></button><button className={`saved-remove ${pendingRemovalId === item.id ? "is-confirming" : ""}`} onClick={() => removeSavedReport(item.id)} aria-label={`${pendingRemovalId === item.id ? "Confirm removing" : "Remove"} ${item.title} from saved reports`}>{pendingRemovalId === item.id ? "Confirm remove" : "Remove"}</button></article>)}</div>}
+      {saved.length === 0 ? <p className="empty">No saved reports yet. Your first useful ticket will land here.</p> : <div className="saved-list">{saved.map((item) => <article className="saved-card" key={item.id}><button className="saved-open" onClick={() => openSavedReport(item)}><span>{item.title}</span><small>{item.category} · {new Date(item.savedAt).toLocaleDateString()}{item.hasScreenshot ? " · Screenshot saved" : ""}</small></button><button className={`saved-remove ${pendingRemovalId === item.id ? "is-confirming" : ""}`} onClick={() => removeSavedReport(item.id)} aria-label={`${pendingRemovalId === item.id ? "Confirm removing" : "Remove"} ${item.title} from saved reports`}>{pendingRemovalId === item.id ? "Confirm remove" : "Remove"}</button></article>)}</div>}
     </section>
     <footer><BoringWorksSignature withTagline /><nav><a href="#top" target="_blank" rel="noreferrer">Top</a><a href="#openai-core" target="_blank" rel="noreferrer">OpenAI core</a><a href="#workspace" target="_blank" rel="noreferrer">Workspace</a><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link><Link href="/datenschutz" target="_blank" rel="noreferrer">Datenschutz</Link><Link className="demo-link" href="/demo" target="_blank" rel="noreferrer">Demo lab</Link></nav></footer>
   </main>;

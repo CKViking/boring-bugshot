@@ -32,6 +32,8 @@ Der MVP ist oeffentlich auf Netlify erreichbar. Lokaler Produktions-Build und ec
 - Save-Feedback sowie PDF- und Markdown-Download funktionieren im Production-Deploy
 - Netlify Function Logs zeigen abgeschlossene Aufrufe ohne sichtbare Fehler
 - Engineer-Feedback lokal geprueft: Footer-Links in neuen Tabs, Zwei-Klick-Loeschen, eigenes URL-Feld sowie Screenshot in PDF und als separate Ticket-Anlage
+- lokale Screenshot-Persistenz ueber IndexedDB implementiert; Saved Reports laden das Bild erneut und entfernen es beim Loeschen gemeinsam mit dem Report
+- Formularhoehe, Labelabstaende und Zwischenueberschriften behutsam verdichtet; Claim-Umbruch und Zielgruppen-Icons visuell geprueft
 
 ## Hackathon-Fokus
 

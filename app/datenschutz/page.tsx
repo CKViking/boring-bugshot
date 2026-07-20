@@ -13,7 +13,7 @@ export default function DatenschutzPage() {
     <article className="legal-content">
       <p className="eyebrow"><i aria-hidden="true" /> DATENSCHUTZHINWEISE</p>
       <h1>Datenschutz</h1>
-      <p className="legal-note"><strong>Kurz gesagt:</strong> Wenn du eine Analyse startest, werden der Screenshot, dein optionaler Kontext, der gewählte Report-Typ und die Ausgabesprache über unseren Server an die OpenAI API übermittelt. Lade keine vertraulichen oder personenbezogenen Daten hoch, wenn du nicht zu ihrer Weitergabe berechtigt bist.</p>
+      <p className="legal-note"><strong>Kurz gesagt:</strong> Wenn du eine Analyse startest, werden der Screenshot, dein optionaler Kontext, der gewählte Report-Typ und die Ausgabesprache über unseren Server an die OpenAI API übermittelt. Erst wenn du anschließend „Save“ auswählst, werden Report und Screenshot zusätzlich ausschließlich lokal in diesem Browser gespeichert. Lade keine vertraulichen oder personenbezogenen Daten hoch, wenn du nicht zu ihrer Weitergabe berechtigt bist.</p>
 
       <h2>1. Verantwortlicher</h2>
       <address>
@@ -37,7 +37,9 @@ export default function DatenschutzPage() {
       <p>OpenAI verwendet Eingaben und Ausgaben der API nach eigenen Angaben standardmäßig nicht zum Training seiner Modelle, sofern der API-Kontoinhaber nicht ausdrücklich einer Datenfreigabe zugestimmt hat. Weitere Informationen: <a href="https://platform.openai.com/docs/models/default-usage-policies-by-endpoint" target="_blank" rel="noreferrer">OpenAI API data controls</a> und <a href="https://openai.com/policies/data-processing-addendum/" target="_blank" rel="noreferrer">OpenAI Data Processing Addendum</a>.</p>
 
       <h2>4. Lokale Speicherung im Browser</h2>
-      <p>Bugshot speichert den Screenshot nicht im lokalen Report-Workspace. Die Vorschau bleibt während der Nutzung im Browser und wird beim Ersetzen oder Schließen der Seite verworfen. Die gewählte Ausgabesprache wird im lokalen Speicher deines Browsers gespeichert. Einen erzeugten Report speichert Bugshot nur dann im lokalen Browser-Speicher, wenn du ausdrücklich auf „Save“ klickst. Diese Daten werden nicht zwischen Geräten synchronisiert und können über die Website-Daten beziehungsweise den lokalen Speicher des Browsers gelöscht werden.</p>
+      <p>Die Vorschau des ausgewählten Screenshots bleibt zunächst nur für die aktuelle Nutzung im Browser. Wenn du nach der Analyse ausdrücklich auf „Save“ klickst, speichert Bugshot den erzeugten Report im lokalen Speicher und den dazugehörigen Screenshot in der lokalen IndexedDB dieses Browsers. Dadurch kann der Screenshot beim späteren Öffnen des Saved Reports erneut angezeigt, heruntergeladen und in ein PDF eingebettet werden.</p>
+      <p>Diese lokal gespeicherten Report- und Screenshot-Daten werden nicht zur Speicherung an Netlify oder erneut an OpenAI übermittelt, nicht zwischen Geräten synchronisiert und sind nur in diesem Browser auf diesem Gerät verfügbar. Wenn du einen Saved Report über „Remove“ und „Confirm remove“ löschst, entfernt Bugshot auch den dazugehörigen Screenshot aus der lokalen Browser-Datenbank. Du kannst alle lokalen Daten außerdem über die Website-Daten deines Browsers löschen.</p>
+      <p>Die gewählte Ausgabesprache wird ebenfalls lokal gespeichert, damit Bugshot sie bei der nächsten Nutzung wieder auswählt.</p>
 
       <h2>5. Cookies und Reichweitenmessung</h2>
       <p>Bugshot setzt derzeit keine eigene Reichweitenmessung, Werbung oder Marketing-Cookies ein.</p>
@@ -47,7 +49,7 @@ export default function DatenschutzPage() {
       <p>Für Fragen oder die Ausübung deiner Rechte genügt eine Nachricht an <a href="mailto:chris@kubisch-design.de">chris@kubisch-design.de</a>.</p>
 
       <h2>7. Stand</h2>
-      <p>19. Juli 2026</p>
+      <p>20. Juli 2026</p>
     </article>
     <footer className="legal-footer"><BoringWorksSignature /><nav><Link href="/" target="_blank" rel="noreferrer">Tool</Link><Link href="/impressum" target="_blank" rel="noreferrer">Impressum</Link></nav></footer>
   </main>;
